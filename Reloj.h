@@ -78,18 +78,24 @@ void printTime() {
   display.setCursor(0, 0);
   display.print(amPM);
 
-  if (barCount == 0) {
-    for (int i = 0; i < 5; i++) {
-      display.fillRect((25 + (i * 16)), (50), 10, 18, 1);
-      
+  if (currentTime - previousTime > 1000) { // 1 segundo en milisegundos
+    previousTime = currentTime;
+    barCount++;
+    
+   if (barCount >= 6) {
+      barCount = 1;
     }
   }
-  if (barCount <= 5) {
-    display.fillRect((25 + ((barCount - 1) * 16)), (50), 10, 18, 0);
+
+  for (int i = 0; i <= 6; i++) {
+    if (barCount <= i) {
+      display.fillRect((25 + (i * 16)), (50), 10, 18, 0);
+    }
+    else {
+      display.fillRect((25 + (i * 16)), (50), 10, 18, 1);
+    }
   }
-  else {
-    barCount = 0;
-  }
+  
   display.display();
 
   //  if (currentTime - previousTime > 1000) { // 1 segundo en milisegundos
