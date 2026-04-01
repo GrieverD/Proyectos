@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiTecHoy — Manual de Administración v3.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Noto+Serif+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════
+   VARIABLES & RESET — idéntico al sitio
+════════════════════════════════════════ */
+:root {
+  --bg0:#070910; --bg1:#0d1118; --bg2:#131720; --bg3:#1a2030; --bg4:#1f2638;
+  --teal:#00c8b4; --teal-dim:rgba(0,200,180,0.12); --teal-glow:rgba(0,200,180,0.25);
+  --violet:#7b5cfa; --gold:#f0a500; --red:#e83a5a; --green:#22c55e;
+  --text:#cdd8ed; --text-dim:#6a7d95; --text-bright:#edf2ff;
+  --border:rgba(0,200,180,0.15); --border-soft:rgba(255,255,255,0.06);
+  --jp-gold:#c8a882;
+  --font-head:'Syne',sans-serif; --font-mono:'DM Mono',monospace; --font-jp:'Noto Serif JP',serif;
+  --nav-h:60px; --radius:10px; --radius-lg:16px;
+  --sidebar-w:268px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background-color:var(--bg0);color:var(--text);font-family:var(--font-head);font-size:15px;line-height:1.7;overflow-x:hidden}
+
+/* Grid background exacto del sitio */
+body::before{
+content:’’;position:fixed;inset:0;
+background-image:linear-gradient(rgba(0,200,180,0.04)1px,transparent 1px),
+linear-gradient(90deg,rgba(0,200,180,0.04)1px,transparent 1px);
+background-size:48px 48px;pointer-events:none;z-index:0;
+}
+a{text-decoration:none;color:var(–teal)}
+a:hover{color:#00e5ce}
+button{cursor:pointer;font-family:inherit}
+code{font-family:var(–font-mono);font-size:0.83em;background:var(–bg3);border:1px solid var(–border);border-radius:4px;padding:1px 6px;color:var(–teal)}
+strong{color:var(–text-bright)}
+
+/* ════════════════════════════════════════
+PROGRESS BAR
+════════════════════════════════════════ */
+.progress-bar{
+position:fixed;top:0;left:0;height:2px;z-index:9999;width:0;
+background:linear-gradient(90deg,var(–teal),var(–violet));
+transition:width 0.15s linear;
+}
+
+/* ════════════════════════════════════════
+TICKER — igual que el sitio
+════════════════════════════════════════ */
+.ticker{
+background:var(–teal);color:#000;font-size:0.72rem;font-weight:600;
+letter-spacing:0.5px;overflow:hidden;height:30px;
+display:flex;align-items:center;position:sticky;top:0;z-index:200;
+}
+.ticker-track{display:flex;white-space:nowrap;animation:ticker 32s linear infinite}
+.ticker-track span{padding:0 2.5rem}
+.ticker-track span::before{content:’◆ ’}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ════════════════════════════════════════
+LAYOUT SHELL
+════════════════════════════════════════ */
+.shell{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{
+width:var(–sidebar-w);flex-shrink:0;
+background:var(–bg1);border-right:1px solid var(–border);
+position:fixed;top:30px;left:0;height:calc(100vh - 30px);
+overflow-y:auto;z-index:150;transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(–border);border-radius:2px}
+.main{margin-left:var(–sidebar-w);flex:1;min-width:0}
+@media(max-width:960px){
+.sidebar{transform:translateX(-100%);top:0;height:100vh}
+.sidebar.open{transform:translateX(0)}
+.main{margin-left:0}
+.mob-toggle{display:flex!important}
+}
+
+/* ════════════════════════════════════════
+SIDEBAR INTERIOR
+════════════════════════════════════════ */
+.sb-brand{
+padding:1.4rem 1.2rem 1rem;border-bottom:1px solid var(–border);
+background:var(–bg0);position:relative;overflow:hidden;
+}
+.sb-brand::after{
+content:’’;position:absolute;bottom:0;left:0;right:0;height:1px;
+background:linear-gradient(90deg,var(–teal),var(–violet),transparent);
+opacity:0.5;
+}
+.sb-logo{
+font-size:1.3rem;font-weight:800;letter-spacing:-0.5px;
+background:linear-gradient(135deg,var(–teal),var(–violet));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+display:block;margin-bottom:2px;
+}
+.sb-logo span{-webkit-text-fill-color:var(–gold);color:var(–gold)}
+.sb-sub{font-family:var(–font-mono);font-size:0.62rem;color:var(–text-dim);letter-spacing:2px;margin-bottom:0.6rem}
+.sb-badges{display:flex;gap:4px;flex-wrap:wrap}
+.sb-badge{
+font-family:var(–font-mono);font-size:0.58rem;font-weight:700;
+padding:2px 7px;border-radius:20px;letter-spacing:0.5px;
+}
+.sb-badge-t{background:rgba(0,200,180,0.12);border:1px solid rgba(0,200,180,0.3);color:var(–teal)}
+.sb-badge-v{background:rgba(123,92,250,0.12);border:1px solid rgba(123,92,250,0.3);color:#a78bfa}
+.sb-badge-g{background:rgba(240,165,0,0.12);border:1px solid rgba(240,165,0,0.3);color:var(–gold)}
+
+.nav-group-label{
+padding:1rem 0 0.3rem 1.2rem;font-family:var(–font-mono);
+font-size:0.6rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;
+color:var(–violet);opacity:0.7;
+}
+.nav-item{
+display:flex;align-items:center;gap:8px;
+padding:0.48rem 1.2rem;font-size:0.8rem;color:var(–text-dim);
+cursor:pointer;transition:all 0.18s;border-left:2px solid transparent;
+position:relative;
+}
+.nav-item:hover,.nav-item.active{
+color:var(–teal);border-left-color:var(–teal);background:var(–teal-dim);
+}
+.nav-item.active::after{
+content:’’;position:absolute;right:1rem;top:50%;transform:translateY(-50%);
+width:4px;height:4px;border-radius:50%;background:var(–teal);
+box-shadow:0 0 6px var(–teal);
+}
+.nav-icon{font-size:0.9rem;width:18px;text-align:center;flex-shrink:0;opacity:0.8}
+.nav-num{
+margin-left:auto;font-family:var(–font-mono);font-size:0.6rem;
+color:var(–text-dim);opacity:0.5;
+}
+
+/* ════════════════════════════════════════
+MOBILE TOGGLE
+════════════════════════════════════════ */
+.mob-toggle{
+display:none;position:fixed;top:40px;left:1rem;z-index:300;
+background:var(–bg2);border:1px solid var(–border);border-radius:6px;
+padding:6px 9px;color:var(–text);font-size:1.1rem;
+line-height:1;align-items:center;justify-content:center;
+transition:all 0.2s;
+}
+.mob-toggle:hover{border-color:var(–teal);color:var(–teal)}
+
+/* ════════════════════════════════════════
+HERO — inspirado en el hero del sitio
+════════════════════════════════════════ */
+.doc-hero{
+position:relative;overflow:hidden;
+min-height:260px;display:flex;align-items:center;
+background:linear-gradient(135deg,#070d1a 0%,#0a1628 40%,#0d1f3c 100%);
+border-bottom:1px solid var(–border);
+}
+/* Overlay con gradientes como el hero del sitio */
+.doc-hero-overlay{
+position:absolute;inset:0;
+background:
+linear-gradient(135deg,rgba(0,200,180,0.10) 0%,transparent 55%),
+linear-gradient(to right,var(–bg0) 0%,transparent 35%,transparent 65%,var(–bg0) 100%),
+linear-gradient(to top,var(–bg0) 0%,transparent 35%);
+}
+/* Scan lines como el hero del sitio */
+.doc-hero::after{
+content:’’;position:absolute;inset:0;
+background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,200,180,0.012) 2px,rgba(0,200,180,0.012) 4px);
+pointer-events:none;
+}
+.doc-hero-content{position:relative;z-index:2;padding:2.5rem 2.5rem 2.5rem}
+.hero-jp{
+font-family:var(–font-jp);font-size:0.8rem;color:var(–jp-gold);
+letter-spacing:6px;margin-bottom:0.7rem;opacity:0.8;
+}
+.hero-label{
+font-family:var(–font-mono);font-size:0.7rem;color:var(–teal);
+letter-spacing:3px;text-transform:uppercase;margin-bottom:0.5rem;
+}
+.hero-title{
+font-size:clamp(1.8rem,4vw,3.2rem);font-weight:800;
+line-height:1.05;letter-spacing:-1.5px;margin-bottom:0.6rem;color:var(–text-bright);
+}
+.hero-title .mi{color:var(–text-bright)}
+.hero-title .tec{color:var(–teal)}
+.hero-title .hoy{color:var(–gold)}
+.hero-title .rest{color:var(–text-dim);font-weight:600;font-size:0.6em;letter-spacing:0;display:block;margin-top:0.2rem}
+.hero-sub{font-size:0.9rem;color:var(–text-dim);max-width:520px;line-height:1.6;margin-bottom:1.4rem}
+.hero-badges{display:flex;flex-wrap:wrap;gap:0.5rem}
+.hbadge{
+display:inline-flex;align-items:center;gap:5px;
+font-family:var(–font-mono);font-size:0.66rem;font-weight:700;
+padding:3px 10px;border-radius:20px;letter-spacing:0.5px;
+}
+.hbadge-t{background:rgba(0,200,180,0.12);border:1px solid rgba(0,200,180,0.3);color:var(–teal)}
+.hbadge-v{background:rgba(123,92,250,0.12);border:1px solid rgba(123,92,250,0.3);color:#a78bfa}
+.hbadge-g{background:rgba(240,165,0,0.12);border:1px solid rgba(240,165,0,0.3);color:var(–gold)}
+
+/* Floater derecho estilo hero-badge del sitio */
+.hero-floater{
+position:absolute;right:2.5rem;top:50%;transform:translateY(-50%);
+background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius-lg);
+padding:1.2rem 1.4rem;text-align:center;display:none;
+}
+@media(min-width:960px){.hero-floater{display:block}}
+.hf-num{font-size:2rem;font-weight:800;font-family:var(–font-mono);color:var(–teal);line-height:1}
+.hf-lbl{font-size:0.65rem;color:var(–text-dim);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.hf-div{height:1px;background:var(–border);margin:0.8rem 0}
+
+/* ════════════════════════════════════════
+TRON DIVIDER — exacto del sitio
+════════════════════════════════════════ */
+.tron-divider{
+height:1px;
+background:linear-gradient(90deg,transparent 0%,var(–teal) 30%,var(–violet) 70%,transparent 100%);
+opacity:0.3;margin:0;
+}
+
+/* ════════════════════════════════════════
+CONTENT AREA
+════════════════════════════════════════ */
+.content{max-width:880px;padding:2.5rem 2.5rem 4rem}
+.doc-section{margin-bottom:3.5rem;scroll-margin-top:2rem}
+
+.section-label{
+font-family:var(–font-mono);font-size:0.7rem;color:var(–teal);
+letter-spacing:3px;text-transform:uppercase;margin-bottom:0.4rem;
+}
+.section-title{
+font-size:clamp(1.4rem,2.5vw,2rem);font-weight:800;color:var(–text-bright);
+line-height:1.1;letter-spacing:-0.5px;margin-bottom:0.5rem;
+}
+.section-desc{font-size:0.88rem;color:var(–text-dim);margin-bottom:1.5rem;line-height:1.75;max-width:680px}
+.section-divider{
+height:1px;
+background:linear-gradient(90deg,var(–teal),var(–violet),transparent);
+opacity:0.2;margin:2.5rem 0;
+}
+.sub-title{
+font-size:0.95rem;font-weight:700;color:var(–text-bright);
+margin:1.5rem 0 0.6rem;display:flex;align-items:center;gap:8px;
+}
+.sub-title::before{
+content:’’;width:3px;height:1em;background:var(–teal);border-radius:2px;flex-shrink:0;
+}
+
+/* ════════════════════════════════════════
+CODE BLOCKS — terminal style
+════════════════════════════════════════ */
+.code-block{
+background:var(–bg1);border:1px solid var(–border);border-radius:var(–radius-lg);
+overflow:hidden;margin:0.8rem 0 1.4rem;position:relative;
+}
+.code-block::before{
+content:’’;position:absolute;top:0;left:0;right:0;height:2px;
+background:linear-gradient(90deg,var(–teal),var(–violet));
+}
+.code-header{
+display:flex;align-items:center;gap:0.6rem;padding:0.65rem 1rem;
+border-bottom:1px solid var(–border);background:var(–bg2);
+}
+.code-dots{display:flex;gap:5px;flex-shrink:0}
+.code-dot{width:10px;height:10px;border-radius:50%}
+.code-dot-r{background:#e83a5a;opacity:0.7}
+.code-dot-y{background:var(–gold);opacity:0.7}
+.code-dot-g{background:var(–green);opacity:0.7}
+.code-title{font-family:var(–font-mono);font-size:0.68rem;color:var(–teal);letter-spacing:1px;flex:1;padding-left:0.4rem}
+.code-lang{
+font-family:var(–font-mono);font-size:0.6rem;background:var(–bg3);
+color:var(–text-dim);padding:2px 8px;border-radius:4px;border:1px solid var(–border-soft);
+}
+.copy-btn{
+background:none;border:1px solid var(–border);border-radius:5px;
+padding:2px 10px;font-size:0.65rem;color:var(–text-dim);cursor:pointer;
+font-family:var(–font-mono);transition:all 0.2s;white-space:nowrap;
+}
+.copy-btn:hover{border-color:var(–teal);color:var(–teal)}
+.copy-btn.copied{border-color:var(–green);color:var(–green)}
+pre{
+padding:1.2rem 1.3rem;overflow-x:auto;font-family:var(–font-mono);
+font-size:0.82rem;line-height:1.75;color:var(–text);
+}
+pre::-webkit-scrollbar{height:4px}
+pre::-webkit-scrollbar-thumb{background:var(–border);border-radius:2px}
+.kw{color:#a78bfa} .str{color:var(–gold)} .cm{color:var(–text-dim);font-style:italic}
+.fn{color:var(–teal)} .path{color:#86efac} .num{color:#f9a8d4} .op{color:#94a3b8}
+
+/* ════════════════════════════════════════
+CARDS — mismo estilo que svc-card del sitio
+════════════════════════════════════════ */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:1rem;margin:1rem 0}
+.card{
+background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius);
+padding:1.4rem 1.2rem;transition:all 0.25s;position:relative;overflow:hidden;
+}
+/* Barra de acento superior en hover — igual que svc-card::before */
+.card::before{
+content:’’;position:absolute;top:0;left:0;right:0;height:2px;
+background:linear-gradient(90deg,var(–teal),var(–violet));
+transform:scaleX(0);transform-origin:left;transition:transform 0.3s;
+}
+.card:hover{border-color:rgba(0,200,180,0.35);transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,0.4)}
+.card:hover::before{transform:scaleX(1)}
+.card-icon{font-size:1.6rem;margin-bottom:0.7rem;display:block}
+.card-title{font-size:0.9rem;font-weight:700;color:var(–text-bright);margin-bottom:0.35rem}
+.card-desc{font-size:0.79rem;color:var(–text-dim);line-height:1.6}
+.card-t{border-left:3px solid var(–teal)}
+.card-v{border-left:3px solid var(–violet)}
+.card-g{border-left:3px solid var(–gold)}
+.card-r{border-left:3px solid var(–red)}
+
+/* LED indicators — idénticos al status panel del sitio */
+.led-row{display:flex;align-items:center;gap:6px;margin-top:0.6rem}
+.led{width:8px;height:8px;border-radius:50%;flex-shrink:0;display:inline-block}
+.led-g{background:#22c55e;box-shadow:0 0 5px #22c55e}
+.led-y{background:#eab308;box-shadow:0 0 5px #eab308}
+.led-r{background:#ef4444;box-shadow:0 0 5px #ef4444}
+.led-b{background:#3b82f6;box-shadow:0 0 5px #3b82f6}
+.led-lbl{font-family:var(–font-mono);font-size:0.68rem;color:var(–text-dim)}
+
+/* ════════════════════════════════════════
+STEPS — con step-num estilo del sitio
+════════════════════════════════════════ */
+.steps-wrap{border:1px solid var(–border);border-radius:var(–radius-lg);overflow:hidden;margin:1rem 0}
+.step{
+display:flex;gap:1.2rem;padding:1rem 1.3rem;
+border-bottom:1px solid var(–border-soft);align-items:flex-start;
+transition:background 0.15s;
+}
+.step:last-child{border-bottom:none}
+.step:hover{background:var(–teal-dim)}
+.step-num{
+background:var(–teal);color:#000;border-radius:50%;
+width:26px;height:26px;min-width:26px;
+display:flex;align-items:center;justify-content:center;
+font-size:0.7rem;font-weight:800;font-family:var(–font-mono);
+flex-shrink:0;margin-top:2px;
+}
+.step-num.vio{background:var(–violet);color:#fff}
+.step-body h4{font-size:0.88rem;font-weight:700;color:var(–text-bright);margin-bottom:0.25rem}
+.step-body p{font-size:0.8rem;color:var(–text-dim);line-height:1.6}
+
+/* ════════════════════════════════════════
+TABLES
+════════════════════════════════════════ */
+.table-wrap{overflow-x:auto;margin:1rem 0;border-radius:var(–radius-lg);border:1px solid var(–border)}
+table{width:100%;border-collapse:collapse;font-size:0.82rem}
+thead{background:var(–bg2)}
+th{
+color:var(–teal);font-family:var(–font-mono);font-size:0.65rem;
+letter-spacing:2px;text-transform:uppercase;padding:0.75rem 1rem;
+text-align:left;border-bottom:2px solid rgba(0,200,180,0.2);white-space:nowrap;
+}
+td{padding:0.65rem 1rem;border-bottom:1px solid var(–border-soft);color:var(–text-dim);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(–bg2)}
+td:first-child{font-family:var(–font-mono);color:var(–teal);white-space:nowrap}
+.td-ok{color:var(–green)!important;font-family:var(–font-mono)}
+.td-bad{color:var(–red)!important;font-family:var(–font-mono)}
+
+/* ════════════════════════════════════════
+ALERTS — con estilo del sitio
+════════════════════════════════════════ */
+.alert{
+border-radius:var(–radius);padding:0.9rem 1.1rem;margin:1rem 0;
+font-size:0.83rem;display:flex;gap:0.8rem;align-items:flex-start;
+line-height:1.6;
+}
+.alert .ai{flex-shrink:0;font-size:1rem}
+.alert-t{background:var(–teal-dim);border:1px solid rgba(0,200,180,0.25);color:var(–text)}
+.alert-v{background:rgba(123,92,250,0.1);border:1px solid rgba(123,92,250,0.3);color:#c4b5fd}
+.alert-g{background:rgba(240,165,0,0.08);border:1px solid rgba(240,165,0,0.25);color:#fde68a}
+.alert-r{background:rgba(232,58,90,0.08);border:1px solid rgba(232,58,90,0.25);color:#fca5a5}
+
+/* ════════════════════════════════════════
+TAGS / PILLS — estilo svc-tag-pill
+════════════════════════════════════════ */
+.tag{
+display:inline-block;background:var(–teal-dim);color:var(–teal);
+font-family:var(–font-mono);font-size:0.68rem;font-weight:600;
+padding:2px 8px;border-radius:20px;margin:1px 2px;
+border:1px solid rgba(0,200,180,0.25);
+}
+.tag-v{background:rgba(123,92,250,0.12);color:#a78bfa;border-color:rgba(123,92,250,0.3)}
+.tag-r{background:rgba(232,58,90,0.1);color:var(–red);border-color:rgba(232,58,90,0.3)}
+.tag-b{background:rgba(59,130,246,0.1);color:#60a5fa;border-color:rgba(59,130,246,0.3)}
+.tag-g{background:rgba(240,165,0,0.1);color:var(–gold);border-color:rgba(240,165,0,0.3)}
+
+/* ════════════════════════════════════════
+STATUS FLOW DIAGRAM
+════════════════════════════════════════ */
+.flow{
+display:flex;align-items:center;flex-wrap:wrap;gap:0.4rem;
+background:var(–bg2);border:1px solid var(–border);border-radius:var(–radius);
+padding:1rem 1.2rem;margin:1rem 0;font-family:var(–font-mono);font-size:0.78rem;
+}
+.flow-node{
+background:var(–bg3);border:1px solid var(–border);border-radius:6px;
+padding:4px 10px;color:var(–text-dim);
+}
+.flow-node.active{border-color:rgba(0,200,180,0.4);color:var(–teal)}
+.flow-arrow{color:var(–text-dim);opacity:0.4;font-size:0.7rem}
+
+/* ════════════════════════════════════════
+FOOTER DEL MANUAL
+════════════════════════════════════════ */
+.doc-footer{
+background:var(–bg0);border-top:1px solid var(–border);
+padding:2rem 2.5rem;position:relative;z-index:1;
+}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.footer-brand{
+font-size:1.2rem;font-weight:800;
+background:linear-gradient(135deg,var(–teal),var(–violet));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.footer-brand span{-webkit-text-fill-color:var(–gold);color:var(–gold)}
+.footer-copy{font-size:0.75rem;color:var(–text-dim)}
+.footer-jp{font-family:var(–font-jp);font-size:0.85rem;color:var(–jp-gold);opacity:0.5;letter-spacing:3px}
+.footer-badge{
+font-family:var(–font-mono);font-size:0.68rem;
+background:var(–bg2);border:1px solid var(–border);
+border-radius:4px;padding:2px 8px;color:var(–teal);
+}
+
+/* ════════════════════════════════════════
+FADE-UP ANIMATIONS — igual que el sitio
+════════════════════════════════════════ */
+@media(prefers-reduced-motion:no-preference){
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity 0.55s ease,transform 0.55s ease}
+.fade-up.visible{opacity:1;transform:none}
+.fade-up:nth-child(2){transition-delay:0.08s}
+.fade-up:nth-child(3){transition-delay:0.16s}
+.fade-up:nth-child(4){transition-delay:0.24s}
+.fade-up:nth-child(5){transition-delay:0.32s}
+.fade-up:nth-child(6){transition-delay:0.4s}
+}
+
+/* ════════════════════════════════════════
+SCROLLBAR — igual que el sitio
+════════════════════════════════════════ */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(–bg0)}
+::-webkit-scrollbar-thumb{background:var(–border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(–teal)}
+
+/* ── Responsive ── */
+@media(max-width:640px){
+.content{padding:1.5rem 1.2rem 3rem}
+.doc-hero-content{padding:2rem 1.2rem}
+.cards-grid{grid-template-columns:1fr}
+}
+</style>
+
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- ══ TICKER ══ -->
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>Manual de Administración MiTecHoy v3.0</span>
+    <span>Astro 4.x · PocketBase · Nginx · Tijuana BC</span>
+    <span>Panel de Estado · Tickets · Privacidad · Deploy</span>
+    <span>Héctor I. Montaño · mitechoy.com · Abril 2026</span>
+    <span>Manual de Administración MiTecHoy v3.0</span>
+    <span>Astro 4.x · PocketBase · Nginx · Tijuana BC</span>
+    <span>Panel de Estado · Tickets · Privacidad · Deploy</span>
+    <span>Héctor I. Montaño · mitechoy.com · Abril 2026</span>
+  </div>
+</div>
+
+<!-- Mobile toggle -->
+
+<button class="mob-toggle" id="mobToggle" onclick="toggleSidebar()" aria-label="Menú">☰</button>
+
+<!-- ══ SIDEBAR ══ -->
+
+<div class="sidebar" id="sidebar">
+  <div class="sb-brand">
+    <span class="sb-logo">Mi<span>Tec</span>Hoy</span>
+    <div class="sb-sub">// MANUAL ADMIN v3.0</div>
+    <div class="sb-badges">
+      <span class="sb-badge sb-badge-t">Astro 4+</span>
+      <span class="sb-badge sb-badge-v">PocketBase</span>
+      <span class="sb-badge sb-badge-g">v3.0</span>
+    </div>
+  </div>
+
+  <div class="nav-group-label">Estructura</div>
+  <div class="nav-item active" onclick="navTo('estructura',this)">
+    <span class="nav-icon">🗂️</span> Estructura del Proyecto <span class="nav-num">01</span>
+  </div>
+  <div class="nav-item" onclick="navTo('deploy',this)">
+    <span class="nav-icon">🚀</span> Desplegar Cambios <span class="nav-num">02</span>
+  </div>
+
+  <div class="nav-group-label">Dispositivos</div>
+  <div class="nav-item" onclick="navTo('status-panel',this)">
+    <span class="nav-icon">🖥️</span> Panel de Estado <span class="nav-num">03</span>
+  </div>
+  <div class="nav-item" onclick="navTo('agregar-devices',this)">
+    <span class="nav-icon">➕</span> Agregar Dispositivos <span class="nav-num">04</span>
+  </div>
+  <div class="nav-item" onclick="navTo('modificar-status',this)">
+    <span class="nav-icon">✏️</span> Modificar Estado <span class="nav-num">05</span>
+  </div>
+
+  <div class="nav-group-label">Tickets & Email</div>
+  <div class="nav-item" onclick="navTo('tickets',this)">
+    <span class="nav-icon">🎫</span> Sistema de Tickets <span class="nav-num">06</span>
+  </div>
+  <div class="nav-item" onclick="navTo('email-privacidad',this)">
+    <span class="nav-icon">🔒</span> Privacidad de Email <span class="nav-num">07</span>
+  </div>
+
+  <div class="nav-group-label">Backend</div>
+  <div class="nav-item" onclick="navTo('pocketbase',this)">
+    <span class="nav-icon">🗄️</span> PocketBase <span class="nav-num">08</span>
+  </div>
+  <div class="nav-item" onclick="navTo('posts',this)">
+    <span class="nav-icon">📝</span> Posts / Blog <span class="nav-num">09</span>
+  </div>
+
+  <div class="nav-group-label">Mantenimiento</div>
+  <div class="nav-item" onclick="navTo('performance',this)">
+    <span class="nav-icon">⚡</span> Performance <span class="nav-num">10</span>
+  </div>
+  <div class="nav-item" onclick="navTo('cheatsheet',this)">
+    <span class="nav-icon">📋</span> Cheat Sheet <span class="nav-num">11</span>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+
+<div class="main">
+
+  <!-- HERO -->
+
+  <div class="doc-hero">
+    <div class="doc-hero-overlay"></div>
+    <div class="doc-hero-content">
+      <div class="hero-jp">技術 · 今日 · 未来 — Tecnología · Hoy · Futuro</div>
+      <div class="hero-label">// Documentación Interna · Administración</div>
+      <h1 class="hero-title">
+        <span class="mi">Mi</span><span class="tec">Tec</span><span class="hoy">Hoy</span>
+        <span class="rest">Manual de Administración</span>
+      </h1>
+      <p class="hero-sub">Todo lo que necesitas saber para gestionar el sitio, el panel de estado, los tickets, el blog y la privacidad de datos — desde tu servidor en Tijuana.</p>
+      <div class="hero-badges">
+        <span class="hbadge hbadge-t">Astro v4+</span>
+        <span class="hbadge hbadge-v">PocketBase</span>
+        <span class="hbadge hbadge-g">Cloudflare Pages</span>
+        <span class="hbadge hbadge-t">v3.0 · Abril 2026</span>
+      </div>
+    </div>
+    <div class="hero-floater">
+      <div class="hf-num">11</div>
+      <div class="hf-lbl">Secciones<br>del Manual</div>
+      <div class="hf-div"></div>
+      <div class="hf-num" style="color:var(--gold)">TJ</div>
+      <div class="hf-lbl">Tijuana,<br>B.C. México</div>
+    </div>
+  </div>
+
+  <div class="tron-divider"></div>
+
+  <!-- CONTENT -->
+
+  <div class="content">
+
+```
+<!-- ══ 01 ESTRUCTURA ══ -->
+<div class="doc-section fade-up" id="estructura">
+  <p class="section-label">// 01 · Arquitectura</p>
+  <h2 class="section-title">Estructura del Proyecto</h2>
+  <p class="section-desc">El sitio vive en tu servidor en la siguiente ruta. Así está organizado:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Árbol de directorios</span>
+      <span class="code-lang">bash</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="path">/mnt/Maindeck/stacks/mitechoy/astro-site/</span>
+```
+
+├── <span class="path">src/</span>
+│   └── <span class="path">pages/</span>
+│       ├── <span class="str">index.astro</span>          <span class="cm">← Página principal (este archivo)</span>
+│       ├── index.astro3originalNoTocar  <span class="cm">← Respaldo original</span>
+│       └── index.astro.bak              <span class="cm">← Respaldo manual</span>
+├── <span class="path">public/</span>
+│   └── <span class="path">imagenes/</span>
+│       └── <span class="str">hector.jpg</span>           <span class="cm">← Tu foto de perfil</span>
+├── astro.config.mjs
+└── package.json</pre>
+</div>
+
+```
+  <div class="alert alert-t">
+    <span class="ai">💡</span>
+    <span><strong>Regla de oro:</strong> Antes de cualquier cambio, haz un respaldo: <code>cp index.astro index.astro.bak</code></span>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card card-t fade-up">
+      <span class="card-icon">📄</span>
+      <div class="card-title">index.astro</div>
+      <div class="card-desc">Todo el sitio en un solo archivo: HTML, CSS y JS. Sin componentes externos por ahora.</div>
+    </div>
+    <div class="card card-v fade-up">
+      <span class="card-icon">🗄️</span>
+      <div class="card-title">PocketBase (pb.mitechoy.com)</div>
+      <div class="card-desc">Base de datos. Guarda tickets, newsletter, y los dispositivos del panel de estado.</div>
+    </div>
+    <div class="card card-g fade-up">
+      <span class="card-icon">🖼️</span>
+      <div class="card-title">public/imagenes/</div>
+      <div class="card-desc">Imágenes estáticas del sitio. Para cambiar tu foto de perfil reemplaza hector.jpg aquí.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ══ 02 DEPLOY ══ -->
+<div class="doc-section fade-up" id="deploy">
+  <p class="section-label">// 02 · Despliegue</p>
+  <h2 class="section-title">Desplegar Cambios</h2>
+  <p class="section-desc">Cuando edites <code>index.astro</code>, sube los cambios con estos comandos desde tu servidor:</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Flujo de despliegue completo</span>
+      <span class="code-lang">bash</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm"># 1. Ve a tu directorio del proyecto</span>
+```
+
+<span class="fn">cd</span> <span class="path">/mnt/Maindeck/stacks/mitechoy/astro-site</span>
+
+<span class="cm"># 2. Haz respaldo rápido</span>
+<span class="fn">cp</span> src/pages/index.astro src/pages/index.astro.bak
+
+<span class="cm"># 3. Copia el nuevo index.astro (si lo subiste por SFTP)</span>
+<span class="fn">cp</span> ~/index.astro src/pages/index.astro
+
+<span class="cm"># 4. Compila el sitio</span>
+<span class="kw">npm run build</span>
+
+<span class="cm"># 5. (Opcional) Previsualiza antes de publicar</span>
+<span class="kw">npm run preview</span>
+
+<span class="cm"># 6. Sincroniza con Cloudflare Pages / servidor web</span>
+<span class="kw">npx wrangler pages deploy</span> dist/ <span class="str">–project-name=mitechoy</span></pre>
+</div>
+
+```
+  <div class="alert alert-g">
+    <span class="ai">⚠️</span>
+    <span>Si usas <strong>caddy / nginx</strong> apuntando directamente a <code>dist/</code>, basta con ejecutar <code>npm run build</code> y el servidor sirve el nuevo contenido automáticamente.</span>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ══ 03 STATUS PANEL ══ -->
+<div class="doc-section fade-up" id="status-panel">
+  <p class="section-label">// 03 · Dispositivos</p>
+  <h2 class="section-title">Panel de Estado de Servicio</h2>
+  <p class="section-desc">El botón flotante <strong>"Estado de servicio"</strong> abre un drawer lateral que muestra tus equipos en reparación en tiempo real. Los datos vienen de PocketBase; si PocketBase no está disponible usa datos de respaldo estáticos.</p>
+
+  <div class="cards-grid">
+    <div class="card card-t fade-up">
+      <span class="card-icon">🔧</span>
+      <div class="card-title">En proceso</div>
+      <div class="led-row"><span class="led led-g"></span><span class="led-lbl">LED verde · El equipo está siendo reparado activamente.</span></div>
+    </div>
+    <div class="card card-g fade-up">
+      <span class="card-icon">⏸️</span>
+      <div class="card-title">En pausa</div>
+      <div class="led-row"><span class="led led-y"></span><span class="led-lbl">LED amarillo · Trabajo detenido temporalmente.</span></div>
+    </div>
+    <div class="card card-r fade-up">
+      <span class="card-icon">🚫</span>
+      <div class="card-title">Detenido</div>
+      <div class="led-row"><span class="led led-r"></span><span class="led-lbl">LED rojo · Trabajo cancelado o sin continuación.</span></div>
+    </div>
+    <div class="card card-v fade-up">
+      <span class="card-icon">✅</span>
+      <div class="card-title">Completado</div>
+      <div class="led-row"><span class="led led-b"></span><span class="led-lbl">LED azul · Reparación terminada y entregada.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ══ 04 AGREGAR DEVICES ══ -->
+<div class="doc-section fade-up" id="agregar-devices">
+  <p class="section-label">// 04 · Dispositivos</p>
+  <h2 class="section-title">Agregar Nuevos Dispositivos</h2>
+  <p class="section-desc">Tienes <strong>dos métodos</strong>: via PocketBase (recomendado, sin tocar código) o editando el array estático en <code>index.astro</code>.</p>
+
+  <div class="sub-title">Método A — PocketBase (Admin Panel)</div>
+
+  <div class="steps-wrap">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Abre el panel de PocketBase</h4>
+        <p>Ve a <a href="https://pb.mitechoy.com/_/" target="_blank">https://pb.mitechoy.com/_/</a> e inicia sesión como admin.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Crea la colección <code>service_orders</code> (si no existe)</h4>
+        <p>En el panel lateral haz clic en <strong>New collection</strong>. Nómbrala <code>service_orders</code> y agrega estos campos:</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h4>Campos requeridos de la colección</h4>
+        <p>Ver tabla de campos a continuación.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Campo</th><th>Tipo</th><th>Descripción</th><th>Ejemplo</th></tr></thead>
+      <tbody>
+        <tr><td>ticket_id</td><td>text</td><td>ID visible para el cliente</td><td>MT-2026-0022</td></tr>
+        <tr><td>device</td><td>text</td><td>Nombre del dispositivo</td><td>Xbox Series X</td></tr>
+        <tr><td>status</td><td>select</td><td>in_progress / paused / stopped / completed</td><td>in_progress</td></tr>
+        <tr><td>image</td><td>url</td><td>URL de foto del equipo (opcional)</td><td>https://…</td></tr>
+        <tr><td>created</td><td>auto</td><td>Fecha de creación (automático)</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="steps-wrap">
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h4>Agrega un registro nuevo</h4>
+        <p>Haz clic en <strong>+ New record</strong>, llena los campos y guarda. El panel de estado del sitio lo mostrará al abrirse (hace fetch a PocketBase).</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <h4>Configura las reglas de la colección como pública de lectura</h4>
+        <p>En la colección ve a <strong>API Rules</strong> → <strong>List / View</strong> → deja vacío (sin regla = público). El resto déjalo bloqueado.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub-title">Método B — Editar el array estático en index.astro</div>
+  <p style="font-size:0.84rem;color:var(--text-dim);margin-bottom:0.8rem">Usa esto cuando PocketBase no está disponible o como respaldo.</p>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">SERVICE_DATA_FALLBACK en index.astro</span>
+      <span class="code-lang">javascript</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">// Busca esta línea en index.astro (línea ~1195):</span>
+```
+
+<span class="kw">const</span> SERVICE_DATA_FALLBACK = [
+<span class="cm">// Copia y pega un bloque nuevo para cada equipo:</span>
+{
+id: <span class="str">“MT-2026-0022”</span>,        <span class="cm">// ← Número de ticket</span>
+device: <span class="str">“MacBook Pro 2021”</span>,  <span class="cm">// ← Nombre del equipo</span>
+image: <span class="str">””</span>,                  <span class="cm">// ← URL de foto (o vacío)</span>
+status: <span class="str">“in_progress”</span>,      <span class="cm">// ← in_progress|paused|stopped|completed</span>
+createdAt: <span class="str">“2026-04-01”</span>,    <span class="cm">// ← Fecha de recepción</span>
+completed: <span class="kw">false</span>             <span class="cm">// ← true solo si status=“completed”</span>
+},
+<span class="cm">// … resto de equipos</span>
+];</pre>
+</div>
+
+```
+  <div class="alert alert-v">
+    <span class="ai">🔑</span>
+    <span><strong>Consejo:</strong> Para que PocketBase sea el único origen de verdad, actualiza <strong>solo desde el panel</strong> y deja el array estático como respaldo de emergencia.</span>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ══ 05 MODIFICAR STATUS ══ -->
+<div class="doc-section fade-up" id="modificar-status">
+  <p class="section-label">// 05 · Dispositivos</p>
+  <h2 class="section-title">Modificar el Estado de un Dispositivo</h2>
+
+  <div class="sub-title">Desde PocketBase (recomendado)</div>
+  <div class="steps-wrap">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><h4>Abre el registro</h4><p>Ve a <code>service_orders</code> → busca el ticket del equipo → clic en el registro.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Cambia el campo <code>status</code></h4>
+        <p>Selecciona el nuevo estado en el dropdown: <span class="tag">in_progress</span> <span class="tag tag-v">paused</span> <span class="tag tag-r">stopped</span> <span class="tag tag-b">completed</span></p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><h4>Guarda</h4><p>El próximo usuario que abra el panel de estado verá el cambio al instante.</p></div>
+    </div>
+  </div>
+
+  <div class="sub-title">Flujo típico de estado</div>
+  <div class="flow">
+    <div class="flow-node active">Ingresa</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node active">in_progress</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">paused</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node active">in_progress</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-node">completed: true</div>
+  </div>
+
+  <div class="sub-title">Por API (desde curl / scripts)</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Actualizar estado vía API REST</span>
+      <span class="code-lang">bash</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm"># Primero obtén el token de admin</span>
+```
+
+<span class="fn">curl</span> -X POST https://pb.mitechoy.com/api/admins/auth-with-password   
+-H <span class="str">“Content-Type: application/json”</span>   
+-d <span class="str">’{“identity”:“tu@email.com”,“password”:“tuPass”}’</span>
+
+<span class="cm"># Luego actualiza el registro (reemplaza RECORD_ID)</span>
+<span class="fn">curl</span> -X PATCH https://pb.mitechoy.com/api/collections/service_orders/records/<span class="str">RECORD_ID</span>   
+-H <span class="str">“Authorization: Bearer TOKEN_AQUI”</span>   
+-H <span class="str">“Content-Type: application/json”</span>   
+-d <span class="str">’{“status”:“completed”}’</span></pre>
+</div>
+</div>
+
+```
+<div class="section-divider"></div>
+
+<!-- ══ 06 TICKETS ══ -->
+<div class="doc-section fade-up" id="tickets">
+  <p class="section-label">// 06 · Tickets & Email</p>
+  <h2 class="section-title">Sistema de Tickets & Email</h2>
+  <p class="section-desc">Cuando un cliente llena el formulario de "Solicitar Servicio", el sistema hace lo siguiente:</p>
+
+  <div class="steps-wrap">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><h4>Genera un ID de ticket</h4><p>Formato automático: <span class="tag">MTH-2026-XXXX</span> — número aleatorio de 4 dígitos.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><h4>Intenta guardar en PocketBase</h4><p>POST a <code>https://pb.mitechoy.com/api/collections/tickets/records</code>. Si responde OK, termina aquí.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><h4>Fallback: abre cliente de correo</h4><p>Si PocketBase falla, abre <code>mailto:mitechoy@gmail.com</code> con el formulario pre-llenado. El cliente presiona "enviar" en su app de correo.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body"><h4>Muestra confirmación</h4><p>El formulario se oculta y aparece el número de ticket con instrucciones.</p></div>
+    </div>
+  </div>
+
+  <div class="sub-title">Colección <code>tickets</code> en PocketBase</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Campo</th><th>Tipo</th><th>Notas</th></tr></thead>
+      <tbody>
+        <tr><td>ticket_id</td><td>text</td><td>MTH-YYYY-XXXX</td></tr>
+        <tr><td>nombre</td><td>text</td><td>Nombre del cliente</td></tr>
+        <tr><td>telefono</td><td>text</td><td>Opcional</td></tr>
+        <tr><td>email</td><td>email</td><td>Del cliente, no tuyo</td></tr>
+        <tr><td>tipo_servicio</td><td>text</td><td>Tutoria / Reparación / etc.</td></tr>
+        <tr><td>descripcion</td><td>text</td><td>Descripción del problema</td></tr>
+        <tr><td>modalidad</td><td>text</td><td>Presencial / En línea / A domicilio</td></tr>
+        <tr><td>fecha_deseada</td><td>text</td><td>Fecha solicitada por el cliente</td></tr>
+        <tr><td>notas</td><td>text</td><td>Notas adicionales</td></tr>
+        <tr><td>status</td><td>text</td><td>nuevo / en_proceso / completado</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-t">
+    <span class="ai">📬</span>
+    <span><strong>Recibir notificación por email:</strong> PocketBase soporta hooks. Ve a <strong>Settings → Mail settings</strong> y configura SMTP (Gmail App Password). Luego en la colección <code>tickets</code> → <strong>Hooks</strong> → crea un webhook que envíe email cuando se crea un registro nuevo.</span>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ══ 07 EMAIL PRIVACIDAD ══ -->
+<div class="doc-section fade-up" id="email-privacidad">
+  <p class="section-label">// 07 · Privacidad</p>
+  <h2 class="section-title">Privacidad de Email</h2>
+  <p class="section-desc">Se eliminó <code>grieverd.him@gmail.com</code> de todo el código público. Aquí está el resumen de la situación actual y recomendaciones:</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Lugar</th><th>Antes</th><th>Ahora</th></tr></thead>
+      <tbody>
+        <tr><td>Botón PayPal (donación)</td><td class="td-bad">grieverd.him@gmail.com</td><td class="td-ok">mitechoy@gmail.com</td></tr>
+        <tr><td>Sub-texto del botón PayPal</td><td class="td-bad">CF obfuscado (aún era visible)</td><td class="td-ok">mitechoy@gmail.com</td></tr>
+        <tr><td>Email en sección Comunidad</td><td class="td-bad">CF obfuscado</td><td class="td-ok">mitechoy@gmail.com</td></tr>
+        <tr><td>Botón Email en footer</td><td class="td-bad">CF obfuscado</td><td class="td-ok">mailto:mitechoy@gmail.com</td></tr>
+        <tr><td>Fallback del formulario</td><td class="td-bad">grieverd.him@gmail.com (en JS)</td><td class="td-ok">mitechoy@gmail.com</td></tr>
+        <tr><td>Modal de servicio (sub)</td><td class="td-bad">CF obfuscado</td><td class="td-ok">mitechoy@gmail.com</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-g">
+    <span class="ai">⚠️</span>
+    <span><strong>PayPal:</strong> La URL de donación ahora usa <code>mitechoy@gmail.com</code>. Si tu cuenta de PayPal está registrada con <code>grieverd.him@gmail.com</code>, debes agregar <code>mitechoy@gmail.com</code> como correo alternativo en PayPal, O usar el "hosted button ID" (que no expone ningún correo).</span>
+  </div>
+
+  <div class="sub-title">Opción segura: PayPal Hosted Button</div>
+  <div class="steps-wrap">
+    <div class="step">
+      <div class="step-num vio">1</div>
+      <div class="step-body"><h4>Ve a paypal.com → Herramientas de pago</h4><p>Inicia sesión → Perfil → Herramientas del vendedor → Botones de pago de PayPal.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num vio">2</div>
+      <div class="step-body"><h4>Crea un botón de donación</h4><p>Selecciona "Donaciones" → Configura moneda MXN → Genera el botón.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num vio">3</div>
+      <div class="step-body"><h4>Copia el "hosted_button_id"</h4><p>La URL resultante será: <code>https://www.paypal.com/donate?hosted_button_id=XXXXX</code> — <strong>sin email visible</strong>.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num vio">4</div>
+      <div class="step-body"><h4>Reemplaza en index.astro</h4><p>Busca la línea del botón PayPal y reemplaza el href por la nueva URL con el hosted_button_id.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ══ 08 POCKETBASE ══ -->
+<div class="doc-section fade-up" id="pocketbase">
+  <p class="section-label">// 08 · Backend</p>
+  <h2 class="section-title">Administrar PocketBase</h2>
+
+  <div class="cards-grid">
+    <div class="card card-t fade-up">
+      <span class="card-icon">🌐</span>
+      <div class="card-title">Panel de Admin</div>
+      <div class="card-desc"><a href="https://pb.mitechoy.com/_/" target="_blank">https://pb.mitechoy.com/_/</a><br>Aquí gestionas colecciones, registros, usuarios y configuración SMTP.</div>
+    </div>
+    <div class="card card-v fade-up">
+      <span class="card-icon">📡</span>
+      <div class="card-title">API Base URL</div>
+      <div class="card-desc">Todas las llamadas del sitio apuntan a:<br><code>https://pb.mitechoy.com</code><br>Definida en la variable <code>PB_URL</code> en index.astro.</div>
+    </div>
+    <div class="card card-g fade-up">
+      <span class="card-icon">📬</span>
+      <div class="card-title">SMTP para notificaciones</div>
+      <div class="card-desc">Settings → Mail → Configura Gmail SMTP con una App Password. Puerto 587, TLS.</div>
+    </div>
+  </div>
+
+  <div class="sub-title">Colecciones necesarias</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Colección</th><th>Uso</th><th>Lectura pública</th></tr></thead>
+      <tbody>
+        <tr><td>tickets</td><td>Solicitudes de servicio del formulario</td><td>No (solo admin)</td></tr>
+        <tr><td>newsletter</td><td>Suscriptores de correo</td><td>No (solo admin)</td></tr>
+        <tr><td>service_orders</td><td>Equipos en el panel de estado</td><td>Sí (list/view)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Cambiar la URL de PocketBase en index.astro</span>
+      <span class="code-lang">javascript</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">// Busca esta línea (~línea 1080 en index.astro)</span>
+```
+
+<span class="kw">const</span> PB_URL = <span class="str">“https://pb.mitechoy.com”</span>;
+<span class="cm">// Cámbiala si mueves PocketBase a otro dominio/puerto</span></pre>
+</div>
+</div>
+
+```
+<div class="section-divider"></div>
+
+<!-- ══ 09 POSTS ══ -->
+<div class="doc-section fade-up" id="posts">
+  <p class="section-label">// 09 · Blog</p>
+  <h2 class="section-title">Gestión de Posts / Blog</h2>
+  <p class="section-desc">Actualmente los posts del blog están hardcodeados en el HTML de <code>index.astro</code>. Puedes moverlos a PocketBase o mantenerlos en código.</p>
+
+  <div class="sub-title">Opción A — Editar directo en index.astro (actual)</div>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Cambiar el post destacado</span>
+      <span class="code-lang">html</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">&lt;!-- Busca esta sección (~línea 479) --&gt;</span>
+```
+
+<span class="kw"><article</span> <span class="fn">class</span>=<span class="str">“post-featured fade-up”</span><span class="kw">></span>
+<span class="kw"><img</span> <span class="fn">src</span>=<span class="str">“URL_DE_IMAGEN”</span> <span class="fn">alt</span>=<span class="str">“Descripción”</span><span class="kw">/></span>
+<span class="kw"><div</span> <span class="fn">class</span>=<span class="str">“post-featured-body”</span><span class="kw">></span>
+<span class="kw"><span</span> <span class="fn">class</span>=<span class="str">“post-cat”</span><span class="kw">></span>Categoría<span class="kw"></span></span>
+<span class="kw"><h3</span> <span class="fn">class</span>=<span class="str">“post-featured-title”</span><span class="kw">></span>Título del post<span class="kw"></h3></span>
+<span class="kw"><p</span> <span class="fn">class</span>=<span class="str">“post-featured-desc”</span><span class="kw">></span>Descripción corta…<span class="kw"></p></span>
+<span class="kw"><div</span> <span class="fn">class</span>=<span class="str">“post-meta”</span><span class="kw">></span>
+<span class="kw"><span></span>📅 01 Abr 2026<span class="kw"></span><span></span>⏱ 5 min<span class="kw"></span></span>
+<span class="kw"></div></span>
+<span class="kw"></div></span>
+<span class="kw"></article></span></pre>
+</div>
+
+```
+  <div class="sub-title">Opción B — PocketBase como CMS de Posts</div>
+  <div class="steps-wrap">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h4>Crea la colección <code>posts</code> en PocketBase</h4>
+        <p>Campos: <span class="tag">title</span> <span class="tag">category</span> <span class="tag">description</span> <span class="tag">image_url</span> <span class="tag">link</span> <span class="tag">date</span> <span class="tag">read_time</span> <span class="tag">featured</span> (bool)</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h4>Agrega este bloque JS en index.astro</h4>
+        <p>Reemplaza el HTML estático del blog con una función que haga fetch y renderice las tarjetas.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Fetch de posts desde PocketBase</span>
+      <span class="code-lang">javascript</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">// Agrega esto en el bloque &lt;script&gt; de index.astro</span>
+```
+
+<span class="kw">async function</span> <span class="fn">loadPosts</span>() {
+<span class="kw">try</span> {
+<span class="kw">const</span> res = <span class="kw">await</span> <span class="fn">fetch</span>(
+PB_URL + <span class="str">”/api/collections/posts/records?sort=-date&perPage=6”</span>
+);
+<span class="kw">const</span> json = <span class="kw">await</span> res.json();
+<span class="cm">// Renderiza con json.items</span>
+} <span class="kw">catch</span> {
+<span class="cm">// Muestra posts estáticos como fallback</span>
+}
+}
+<span class="fn">loadPosts</span>();</pre>
+</div>
+
+```
+  <div class="alert alert-t">
+    <span class="ai">🌟</span>
+    <span><strong>Recomendación:</strong> Para el blog con buen SEO considera migrar a Astro con Content Collections (<code>.md</code> files). Los posts en <code>src/content/blog/</code> son indexados por buscadores. PocketBase es mejor para contenido dinámico que no necesita SEO.</span>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ══ 10 PERFORMANCE ══ -->
+<div class="doc-section fade-up" id="performance">
+  <p class="section-label">// 10 · Performance</p>
+  <h2 class="section-title">Performance & Auditoría</h2>
+  <p class="section-desc">Resumen de las mejoras aplicadas en v3.0 y recomendaciones pendientes:</p>
+
+  <div class="cards-grid">
+    <div class="card card-t fade-up">
+      <span class="card-icon">✅</span>
+      <div class="card-title">Hero: object-position: top</div>
+      <div class="card-desc">La foto de portada ya no se corta por arriba. Altura aumentada a 600px desktop / 520px mobile.</div>
+    </div>
+    <div class="card card-t fade-up">
+      <span class="card-icon">✅</span>
+      <div class="card-title">Email privacidad</div>
+      <div class="card-desc">Se eliminó grieverd.him@gmail.com del código público. Todo apunta a mitechoy@gmail.com.</div>
+    </div>
+    <div class="card card-t fade-up">
+      <span class="card-icon">✅</span>
+      <div class="card-title">Status Panel integrado</div>
+      <div class="card-desc">Panel de estado con fetch a PocketBase y fallback estático. Animación LED en tiempo real.</div>
+    </div>
+    <div class="card card-g fade-up">
+      <span class="card-icon">⚡</span>
+      <div class="card-title">Fuentes: considera self-hosting</div>
+      <div class="card-desc">Las Google Fonts (Syne, DM Mono, Noto Serif JP) se cargan de Google. Para máxima velocidad, descárgalas y sírvelas desde tu servidor.</div>
+    </div>
+    <div class="card card-g fade-up">
+      <span class="card-icon">🖼️</span>
+      <div class="card-title">Imágenes: convertir a WebP</div>
+      <div class="card-desc">Las imágenes de Unsplash ya tienen parámetro de calidad. Para hector.jpg usa Squoosh o cwebp para convertir a WebP antes de subir.</div>
+    </div>
+    <div class="card card-v fade-up">
+      <span class="card-icon">📦</span>
+      <div class="card-title">Considera dividir en componentes</div>
+      <div class="card-desc">El archivo index.astro tiene ~1350 líneas. Considera extraer sections a componentes .astro separados para facilitar el mantenimiento.</div>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Auditoría rápida con Lighthouse CLI</span>
+      <span class="code-lang">bash</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm"># Instala Lighthouse si no lo tienes</span>
+```
+
+<span class="fn">npm install -g</span> lighthouse
+
+<span class="cm"># Corre la auditoría (con el sitio en producción)</span>
+<span class="fn">lighthouse</span> https://www.mitechoy.com   
+–output=html   
+–output-path=./lighthouse-report.html   
+–chrome-flags=<span class="str">”–headless”</span>
+
+<span class="cm"># Abre el reporte</span>
+<span class="fn">open</span> lighthouse-report.html</pre>
+</div>
+</div>
+
+```
+<div class="section-divider"></div>
+
+<!-- ══ 11 CHEAT SHEET ══ -->
+<div class="doc-section fade-up" id="cheatsheet">
+  <p class="section-label">// 11 · Referencia Rápida</p>
+  <h2 class="section-title">Cheat Sheet — Comandos rápidos</h2>
+
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots"><div class="code-dot code-dot-r"></div><div class="code-dot code-dot-y"></div><div class="code-dot code-dot-g"></div></div>
+      <span class="code-title">Comandos esenciales del día a día</span>
+      <span class="code-lang">bash</span>
+      <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><span class="cm">## ─── DIRECTORIO BASE ────────────────────────</span>
+```
+
+<span class="fn">cd</span> <span class="path">/mnt/Maindeck/stacks/mitechoy/astro-site</span>
+
+<span class="cm">## ─── RESPALDO ────────────────────────────────</span>
+<span class="fn">cp</span> src/pages/index.astro src/pages/index.astro.bak
+
+<span class="cm">## ─── DESARROLLO LOCAL ────────────────────────</span>
+<span class="kw">npm run dev</span>                <span class="cm"># Servidor en localhost:4321</span>
+
+<span class="cm">## ─── COMPILAR ────────────────────────────────</span>
+<span class="kw">npm run build</span>              <span class="cm"># Genera carpeta dist/</span>
+
+<span class="cm">## ─── VER ARCHIVOS GENERADOS ──────────────────</span>
+<span class="fn">ls</span> dist/
+
+<span class="cm">## ─── VER VERSIÓN ACTUAL ──────────────────────</span>
+<span class="fn">grep</span> <span class="str">“footer-badge”</span> src/pages/index.astro | grep -o <span class="str">‘v[0-9.]*’</span>
+
+<span class="cm">## ─── POCKETBASE ──────────────────────────────</span>
+<span class="cm"># Panel admin</span>
+<span class="fn">open</span> https://pb.mitechoy.com/_/
+
+<span class="cm"># Ver todos los service_orders</span>
+<span class="fn">curl</span> https://pb.mitechoy.com/api/collections/service_orders/records
+
+<span class="cm"># Ver todos los tickets</span>
+<span class="fn">curl</span> -H <span class="str">“Authorization: Bearer TOKEN”</span>   
+https://pb.mitechoy.com/api/collections/tickets/records
+
+<span class="cm">## ─── SUBIR FOTO DE PERFIL ────────────────────</span>
+<span class="cm"># Copia la nueva foto (nombrada hector.jpg) a public/imagenes/</span>
+<span class="fn">cp</span> ~/nueva_foto.jpg <span class="path">public/imagenes/hector.jpg</span>
+<span class="kw">npm run build</span></pre>
+</div>
+
+```
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Tarea</th><th>Qué hacer</th></tr></thead>
+      <tbody>
+        <tr><td>Cambiar foto portada</td><td>Reemplazar public/imagenes/hector.jpg → npm run build</td></tr>
+        <tr><td>Agregar dispositivo al panel</td><td>PocketBase → service_orders → New record</td></tr>
+        <tr><td>Cambiar estado de dispositivo</td><td>PocketBase → service_orders → editar registro → cambiar status</td></tr>
+        <tr><td>Ver tickets recibidos</td><td>PocketBase → tickets (requiere token admin)</td></tr>
+        <tr><td>Actualizar post del blog</td><td>Editar index.astro sección #blog → npm run build</td></tr>
+        <tr><td>Cambiar URL de PocketBase</td><td>index.astro → buscar const PB_URL</td></tr>
+        <tr><td>Agregar suscriptor manualmente</td><td>PocketBase → newsletter → New record</td></tr>
+        <tr><td>Rollback de emergencia</td><td>cp index.astro.bak index.astro → npm run build</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="alert alert-v">
+    <span class="ai">🤖</span>
+    <span><strong>Tip final:</strong> Guarda este archivo en <code>/mnt/Maindeck/stacks/mitechoy/astro-site/MANUAL_MITECHOY.html</code> y ábrelo con tu navegador local. No necesita servidor para funcionar.</span>
+  </div>
+</div>
+```
+
+  </div><!-- /content -->
+
+  <div class="tron-divider"></div>
+
+  <!-- FOOTER -->
+
+  <footer class="doc-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">Mi<span>Tec</span>Hoy</div>
+        <div class="footer-copy">Manual de Administración · Héctor I. Montaño · Tijuana, B.C. México</div>
+      </div>
+      <div class="footer-jp">技術今日未来</div>
+      <span class="footer-badge">v3.0</span>
+    </div>
+  </footer>
+
+</div><!-- /main -->
+
+<script>
+/* ── Progress bar ── */
+window.addEventListener('scroll', () => {
+  const doc = document.documentElement;
+  const pct = doc.scrollTop / (doc.scrollHeight - doc.clientHeight) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+}, { passive: true });
+
+/* ── Sidebar toggle (mobile) ── */
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('mobToggle');
+  const open = sb.classList.toggle('open');
+  btn.textContent = open ? '✕' : '☰';
+}
+
+/* ── Nav scroll ── */
+function navTo(id, el) {
+  const target = document.getElementById(id);
+  if (!target) return;
+  target.scrollIntoView({ behavior: 'smooth' });
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  if (window.innerWidth <= 960) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('mobToggle').textContent = '☰';
+  }
+}
+
+/* ── Active nav on scroll ── */
+const sections = document.querySelectorAll('.doc-section[id]');
+const navItems = document.querySelectorAll('.nav-item');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  navItems.forEach(n => {
+    const fn = n.getAttribute('onclick') || '';
+    const m = fn.match(/navTo\('(.+?)'/);
+    if (m) n.classList.toggle('active', m[1] === current);
+  });
+}, { passive: true });
+
+/* ── Copy code button ── */
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    btn.textContent = '✓ Copiado';
+    setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+  });
+}
+
+/* ── Fade-up IntersectionObserver ── */
+const fadeEls = document.querySelectorAll('.fade-up');
+if ('IntersectionObserver' in window) {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  fadeEls.forEach(el => obs.observe(el));
+} else {
+  fadeEls.forEach(el => el.classList.add('visible'));
+}
+
+/* ── Close sidebar on outside click (mobile) ── */
+document.addEventListener('click', e => {
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('mobToggle');
+  if (window.innerWidth <= 960 && sb.classList.contains('open') && !sb.contains(e.target) && e.target !== btn) {
+    sb.classList.remove('open');
+    btn.textContent = '☰';
+  }
+});
+</script>
+
+</body>
+</html>
